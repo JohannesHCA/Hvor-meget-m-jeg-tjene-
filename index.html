@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>SU-loft 2026</title>
+<meta name="description" content="Se hvor langt du er fra SU-fribeløbet. Dine tal gemmes kun i din egen browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f5bd3'/%3E%3Crect x='6' y='13' width='14' height='6' rx='2' fill='white'/%3E%3Crect x='23' y='8' width='3' height='16' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f5f4ef;
+    --surface: #ffffff;
+    --surface-2: #f1efe8;
+    --text: #1c1c1a;
+    --muted: #64625b;
+    --border: #e2dfd6;
+    --border-strong: #c9c5ba;
+    --accent: #2f5bd3;
+    --accent-ink: #ffffff;
+    --accent-soft: #e8eefc;
+    --green: #1b7f46;
+    --green-soft: #e1f3e7;
+    --orange: #b85f00;
+    --orange-soft: #fcefdc;
+    --red: #c42f2f;
+    --red-soft: #fbe4e4;
+    --track: #ebe8e0;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.04);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --surface: #1d1d1b;
+      --surface-2: #272725;
+      --text: #ecebe6;
+      --muted: #a4a29b;
+      --border: #33322e;
+      --border-strong: #4b4944;
+      --accent: #7f9ff6;
+      --accent-ink: #10142a;
+      --accent-soft: #1f2741;
+      --green: #4cc27e;
+      --green-soft: #15301f;
+      --orange: #f2a447;
+      --orange-soft: #3a2911;
+      --red: #f26d6d;
+      --red-soft: #3c1919;
+      --track: #2c2b28;
+      --shadow: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 28px 16px 56px; }
+  h1, h2 { margin: 0; line-height: 1.25; }
+  h1 { font-size: 1.15rem; font-weight: 650; }
+  h2 { font-size: 1.05rem; font-weight: 650; }
+  a { color: var(--accent); }
+  .num, .money input, dd, .sum { font-variant-numeric: tabular-nums; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Header */
+  .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .eyebrow { margin: 0 0 2px; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .privacy { margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--muted); }
+  .privacy svg { width: 14px; height: 14px; flex: none; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-top: 14px; box-shadow: var(--shadow); }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hint { font-size: .85rem; color: var(--muted); }
+
+  /* Example banner */
+  .banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap;
+    border: 2px dashed var(--orange); background: var(--orange-soft); border-radius: var(--radius); padding: 14px 16px;
+  }
+  .banner p { margin: 0; flex: 1 1 280px; }
+  .banner strong { color: var(--orange); text-transform: uppercase; letter-spacing: .04em; }
+
+  /* Buttons */
+  .btn { font: inherit; font-weight: 600; font-size: .95rem; border-radius: 10px; padding: 10px 16px; border: 1px solid transparent; cursor: pointer; background: none; color: var(--text); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.add { border: 1px dashed var(--border-strong); margin-top: 10px; }
+  .btn.add:hover { background: var(--surface-2); }
+  .btn.danger { border-color: var(--border-strong); color: var(--red); }
+  .btn.danger:hover { background: var(--red-soft); }
+
+  /* Hero */
+  .hero { position: relative; padding: 24px 20px 20px; }
+  .hero[data-status="green"]  { --c: var(--green);  --c-soft: var(--green-soft); }
+  .hero[data-status="orange"] { --c: var(--orange); --c-soft: var(--orange-soft); }
+  .hero[data-status="red"]    { --c: var(--red);    --c-soft: var(--red-soft); }
+  .ex-tag {
+    display: none; position: absolute; top: 14px; right: 14px; font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+    color: var(--orange); border: 1.5px dashed var(--orange); border-radius: 999px; padding: 2px 10px; background: var(--orange-soft);
+  }
+  body.is-example .ex-tag { display: inline-block; }
+  body.is-example .hero { border: 2px dashed var(--orange); }
+  .headline { margin: 0; font-size: clamp(1.45rem, 4.6vw, 2.05rem); font-weight: 650; line-height: 1.2; letter-spacing: -.01em; padding-right: 84px; }
+  .headline strong { color: var(--c); white-space: nowrap; }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: 1.02rem; }
+  .sub strong { color: var(--text); white-space: nowrap; }
+  .status { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 5px 12px 5px 10px; border-radius: 999px; background: var(--c-soft); color: var(--c); font-weight: 600; font-size: .9rem; }
+  .status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+
+  .gauge { margin-top: 30px; }
+  .track { position: relative; height: 30px; }
+  .bar { position: absolute; inset: 0; background: var(--track); border-radius: 8px; overflow: hidden; }
+  .fill { position: absolute; top: 0; bottom: 0; left: 0; transition: width .35s ease, left .35s ease; }
+  .fill.now { background: var(--c); }
+  .fill.fc {
+    background: repeating-linear-gradient(135deg, var(--c) 0 3px, transparent 3px 8px);
+    opacity: .65; box-shadow: inset 0 0 0 1.5px var(--c);
+  }
+  .limit { position: absolute; top: -7px; bottom: -7px; width: 3px; margin-left: -1.5px; background: var(--text); border-radius: 2px; transition: left .35s ease; }
+  .limit span { position: absolute; bottom: calc(100% + 3px); white-space: nowrap; font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .limit.anchor-right span { right: 0; }
+  .limit.anchor-left span { left: 0; }
+  .legend { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .88rem; color: var(--muted); }
+  .legend li { display: inline-flex; align-items: center; gap: 7px; }
+  .legend b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .sw.now { background: var(--c); }
+  .sw.fc { background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--c); opacity: .8; }
+  .sw.lim { width: 3px; background: var(--text); border-radius: 2px; }
+  .forecast { margin: 12px 0 0; font-size: .92rem; color: var(--muted); }
+
+  /* Guide */
+  .guide { background: var(--accent-soft); border-color: transparent; box-shadow: none; }
+  .guide p { margin: 6px 0 0; }
+  .guide .path { font-weight: 600; }
+
+  /* Lines table */
+  .lines { width: 100%; border-collapse: collapse; }
+  .lines th { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; text-align: left; padding: 0 6px 6px; }
+  .lines th.r { text-align: right; }
+  .lines th.c { text-align: center; }
+  .lines td { padding: 7px 6px; border-top: 1px solid var(--border); vertical-align: middle; }
+  .lines .c-amt { width: 190px; }
+  .lines .c-chk { width: 104px; text-align: center; }
+  .lines .c-del { width: 44px; text-align: right; }
+  .lines tfoot td { border-top: 1.5px solid var(--border-strong); font-weight: 600; padding-top: 10px; }
+  .lines tfoot .sum { text-align: right; padding-right: 36px; }
+  .empty td { color: var(--muted); font-size: .92rem; padding: 14px 6px; }
+
+  input[type="text"], select {
+    width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border-strong); border-radius: 9px; padding: 9px 10px; min-height: 42px;
+  }
+  input[type="text"]::placeholder { color: var(--muted); opacity: .75; }
+  input[type="text"]:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .money { display: flex; align-items: center; gap: 6px; }
+  .money input { text-align: right; }
+  .money .unit { color: var(--muted); font-size: .92rem; flex: none; }
+  input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; vertical-align: middle; cursor: pointer; }
+  input[type="checkbox"]:disabled { cursor: not-allowed; }
+  .chk { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .chk-label { display: none; font-size: .9rem; }
+  .del { width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent; background: none; color: var(--muted); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+  .del:hover { background: var(--red-soft); color: var(--red); }
+
+  .badge { display: none; margin-top: 6px; font-size: .78rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border-strong); }
+  tr.is-su .badge { display: inline-block; }
+  tr.is-su .money input { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  tr.off .money input { color: var(--muted); }
+
+  /* Fields */
+  .fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field > span { font-weight: 600; font-size: .92rem; }
+  .field small { color: var(--muted); font-size: .82rem; line-height: 1.4; }
+
+  /* Months */
+  .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; }
+  .month {
+    font: inherit; cursor: pointer; border-radius: 10px; padding: 8px 2px; min-height: 58px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    border: 2px solid var(--accent); background: var(--accent-soft); color: var(--text);
+  }
+  .month .m { font-weight: 650; font-size: .95rem; }
+  .month .s { font-size: .7rem; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+  .month[aria-pressed="false"] { border: 2px dashed var(--orange); background: var(--orange-soft); color: var(--orange); }
+  .month[aria-pressed="false"] .s { color: var(--orange); }
+  .months-note { margin: 12px 0 0; font-size: .95rem; }
+  .months-note.warn { color: var(--orange); font-weight: 600; }
+  .allowance { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
+  .allowance b { color: var(--text); }
+
+  /* Calculation */
+  .calc { margin: 10px 0 0; }
+  .calc div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--border); font-size: .94rem; }
+  .calc div:first-child { border-top: 0; }
+  .calc dt { color: var(--muted); }
+  .calc dd { margin: 0; text-align: right; white-space: nowrap; }
+  .calc .total dt, .calc .total dd { color: var(--text); font-weight: 650; }
+  .calc .total { border-top: 1.5px solid var(--border-strong); }
+
+  /* Note */
+  .note { margin-top: 22px; font-size: .9rem; color: var(--muted); }
+  .note p { margin: 0 0 8px; }
+  .note strong { color: var(--text); }
+  .foot { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin-top: 14px; }
+  .save-status { font-size: .85rem; }
+
+  @media (max-width: 700px) {
+    .fields { grid-template-columns: 1fr; }
+    .months { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .card { padding: 16px; }
+    .headline { padding-right: 0; padding-top: 18px; }
+    .lines thead { display: none; }
+    .lines tbody tr { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+    .lines tbody td { display: block; padding: 0; border: 0; width: auto !important; }
+    .lines .c-name { grid-column: 1 / -1; }
+    .lines .c-chk { text-align: left; }
+    .chk-label { display: inline; }
+    .lines tfoot tr { display: flex; justify-content: space-between; }
+    .lines tfoot td { display: block; }
+    .lines tfoot .sum { padding-right: 0; }
+    .lines tfoot .pad { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">SU-loft <span data-year>2026</span> · videregående uddannelse</p>
+      <h1>Hvor langt er du fra SU-fribeløbet?</h1>
+    </div>
+    <p class="privacy">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1a3.5 3.5 0 0 0-3.5 3.5V6H4a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 4 15h8a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 12 6h-.5V4.5A3.5 3.5 0 0 0 8 1Zm2 5H6V4.5a2 2 0 1 1 4 0V6Z"/></svg>
+      Dine tal gemmes kun i din egen browser
+    </p>
+  </header>
+
+  <section id="exampleBanner" class="banner" hidden>
+    <p><strong>Eksempeltal</strong> – det her er ikke dine tal, men et opdigtet eksempel, så du kan se, hvordan siden virker.</p>
+    <button type="button" id="clearExample" class="btn primary">Ryd og indtast mine egne tal</button>
+  </section>
+
+  <section class="card hero" id="hero" data-status="green" aria-live="polite">
+    <span class="ex-tag">EKSEMPEL</span>
+    <p class="headline" id="headline"></p>
+    <p class="sub" id="subline"></p>
+    <span class="status" id="status"><span class="dot"></span><span id="statusText"></span></span>
+
+    <div class="gauge" id="gauge" role="img">
+      <div class="track">
+        <div class="bar">
+          <div class="fill now" id="gNow"></div>
+          <div class="fill fc" id="gFc"></div>
+        </div>
+        <div class="limit" id="gLimit"><span id="gLimitLabel"></span></div>
+      </div>
+    </div>
+    <ul class="legend" aria-hidden="true">
+      <li><span class="sw now"></span>Egenindkomst nu <b id="lNow"></b></li>
+      <li><span class="sw fc"></span>Prognose <b id="lFc"></b></li>
+      <li><span class="sw lim"></span>Fribeløb <b id="lLim"></b></li>
+    </ul>
+    <p class="forecast" id="forecastLine"></p>
+  </section>
+
+  <section class="card guide">
+    <h2>Sådan finder du tallene</h2>
+    <p>Åbn <span class="path">Skatteguiden → Indkomst → vælg År → „Indkomst før skat“ og „Feriepenge“</span>. Indtast beløbet for hver afsender.</p>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Indkomst før skat</h2>
+      <span class="hint">Én linje pr. afsender. Udbetalt SU tæller ikke med.</span>
+    </div>
+    <table class="lines">
+      <thead><tr><th>Afsender</th><th class="r">Beløb</th><th class="c">Tæller med</th><th><span class="sr">Fjern</span></th></tr></thead>
+      <tbody id="incomeBody"></tbody>
+      <tfoot><tr><td>Tæller med i alt</td><td class="sum" id="incomeSum"></td><td class="pad" colspan="2"></td></tr></tfoot>
+    </table>
+    <button type="button" class="btn add" data-add="income">+ Tilføj linje</button>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Feriepenge</h2>
+      <span class="hint">Tæller med i det år, de bliver udbetalt.</span>
+    </div>
+    <table class="lines">
+      <thead><tr><th>Arbejdsgiver</th><th class="r">Beløb</th><th class="c">Tæller med i år</th><th><span class="sr">Fjern</span></th></tr></thead>
+      <tbody id="holidayBody"></tbody>
+      <tfoot><tr><td>Tæller med i alt</td><td class="sum" id="holidaySum"></td><td class="pad" colspan="2"></td></tr></tfoot>
+    </table>
+    <button type="button" class="btn add" data-add="holiday">+ Tilføj feriepenge</button>
+  </section>
+
+  <section class="card">
+    <div class="section-head"><h2>Resten af året</h2></div>
+    <div class="fields">
+      <label class="field">
+        <span>Løn registreret til og med</span>
+        <select id="through"></select>
+        <small>Den sidste måned, Skatteguiden har tal for.</small>
+      </label>
+      <label class="field">
+        <span>Forventet bruttoløn resten af året</span>
+        <span class="money"><input type="text" inputmode="decimal" id="expected" placeholder="0" autocomplete="off"><span class="unit">kr.</span></span>
+        <small id="expectedHint"></small>
+      </label>
+      <label class="field">
+        <span>Positiv kapitalindkomst</span>
+        <span class="money"><input type="text" inputmode="decimal" id="capital" placeholder="0" autocomplete="off"><span class="unit">kr.</span></span>
+        <small>Fx renter og udbytte. Et negativt beløb trækkes ikke fra.</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Måneder med SU</h2>
+      <span class="hint">Tryk på en måned for at slå SU til eller fra.</span>
+    </div>
+    <div class="months" id="months"></div>
+    <p class="months-note" id="monthsNote"></p>
+    <p class="allowance">Dit fribeløb for <span data-year>2026</span>: <b id="allowance"></b></p>
+  </section>
+
+  <section class="card">
+    <h2>Sådan er det regnet</h2>
+    <dl class="calc">
+      <div><dt>Lønindkomst, der tæller med (inkl. feriepenge)</dt><dd id="cWage"></dd></div>
+      <div><dt id="cAmLabel">− AM-bidrag</dt><dd id="cAm"></dd></div>
+      <div><dt>+ Positiv kapitalindkomst</dt><dd id="cCap"></dd></div>
+      <div class="total"><dt>= Egenindkomst nu</dt><dd id="cOwn"></dd></div>
+      <div><dt id="cExpLabel">+ Forventet løn efter AM-bidrag</dt><dd id="cExp"></dd></div>
+      <div class="total"><dt>= Prognose for året</dt><dd id="cFc"></dd></div>
+      <div><dt>Fribeløb (sum af 12 måneder)</dt><dd id="cAllow"></dd></div>
+    </dl>
+  </section>
+
+  <footer class="note">
+    <p><strong>Tallene er et pejlemærke, ikke en afgørelse.</strong> Egenindkomsten her er en tilnærmelse. SU laver den endelige kontrol, når årsopgørelsen er klar. Starter eller afslutter du uddannelsen i løbet af året, gælder der særlige regler.</p>
+    <p><a id="satserLink" href="https://www.su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-maanedsfribeloeb" target="_blank" rel="noopener">Se satserne for månedsfribeløb på su.dk</a></p>
+    <div class="foot">
+      <button type="button" id="deleteData" class="btn danger">Slet mine tal</button>
+      <span class="save-status" id="saveStatus"></span>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+/* CALC-START */
+// Alle satser samlet ét sted. Opdatér her til et nyt år.
+const RATES = {
+  year: 2026,
+  monthlyWithSU: 20749,     // månedsfribeløb i måneder med SU
+  monthlyWithoutSU: 23598,  // månedsfribeløb i måneder, hvor man er indskrevet uden SU
+  amRate: 0.08,             // AM-bidrag
+  warnAt: 0.85,             // orange fra 85 % af fribeløbet
+  suSenders: ['UFS', 'Uddannelses- og Forskningsstyrelsen'],
+  satserUrl: 'https://www.su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-maanedsfribeloeb'
+};
+
+function isSuSender(name, R) {
+  const text = String(name || '');
+  return R.suSenders.some(function (s) {
+    const esc = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*');
+    return new RegExp('(^|[^a-zæøå0-9])' + esc + '($|[^a-zæøå0-9])', 'i').test(text);
+  });
+}
+
+function annualAllowance(suMonths, R) {
+  let sum = 0;
+  for (let i = 0; i < 12; i++) sum += suMonths[i] === false ? R.monthlyWithoutSU : R.monthlyWithSU;
+  return sum;
+}
+
+function calculate(s, R) {
+  const num = function (v) { return typeof v === 'number' && isFinite(v) ? v : 0; };
+  const keep = 1 - R.amRate;
+
+  const incomeCounted = s.income
+    .filter(function (l) { return l.counts && !isSuSender(l.name, R); })
+    .reduce(function (a, l) { return a + num(l.amount); }, 0);
+  const holidayCounted = s.holiday
+    .filter(function (l) { return l.counts; })
+    .reduce(function (a, l) { return a + num(l.amount); }, 0);
+
+  const wage = incomeCounted + holidayCounted;
+  const am = wage * R.amRate;
+  const capital = Math.max(0, num(s.capital));
+  const ownNow = wage - am + capital;
+  const expectedNet = Math.max(0, num(s.expected)) * keep;
+  const forecast = ownNow + expectedNet;
+
+  const allowance = annualAllowance(s.suMonths, R);
+  const left = allowance - ownNow;
+  const monthsLeft = Math.max(0, 12 - num(s.through));
+  const grossPerMonth = monthsLeft > 0 && left > 0 ? left / keep / monthsLeft : 0;
+
+  const ratio = forecast / allowance;
+  const status = ratio < R.warnAt ? 'green' : ratio <= 1 ? 'orange' : 'red';
+
+  return {
+    incomeCounted: incomeCounted, holidayCounted: holidayCounted, wage: wage, am: am, capital: capital,
+    ownNow: ownNow, expectedNet: expectedNet, forecast: forecast, allowance: allowance, left: left,
+    monthsLeft: monthsLeft, grossPerMonth: grossPerMonth, ratio: ratio, status: status
+  };
+}
+/* CALC-END */
+
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'su-loft-v1';
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+  const MONTHS_ABBR = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
+  const MONTHS_LONG = ['januar', 'februar', 'marts', 'april', 'maj', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'december'];
+
+  const fmt0 = new Intl.NumberFormat('da-DK', { maximumFractionDigits: 0 });
+  const fmt2 = new Intl.NumberFormat('da-DK', { maximumFractionDigits: 2 });
+  const fmtPct = new Intl.NumberFormat('da-DK', { maximumFractionDigits: 0 });
+  const kr = function (v) { return fmt0.format(Math.round(v) || 0) + ' kr.'; };
+
+  const $ = function (id) { return document.getElementById(id); };
+  const uid = function () { return Math.random().toString(36).slice(2, 10); };
+
+  function parseAmount(str) {
+    let s = String(str == null ? '' : str)
+      .replace(/kr\.?/gi, '')
+      .replace(/[\s ]/g, '')
+      .replace(/[−–]/g, '-')
+      .replace(/\./g, '')
+      .replace(',', '.');
+    const n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  }
+  const showAmount = function (n) { return n ? fmt2.format(n) : ''; };
+
+  function defaultThrough() {
+    const d = new Date();
+    if (d.getFullYear() === RATES.year) return d.getMonth(); // sidste afsluttede måned
+    return d.getFullYear() > RATES.year ? 12 : 0;
+  }
+
+  function line(name, amount, counts) {
+    return { id: uid(), name: name || '', amount: amount || 0, counts: counts !== false };
+  }
+
+  function exampleState() {
+    return {
+      example: true,
+      income: [
+        line('Eksempel: Arbejdsgiver A', 40000, true),
+        line('Eksempel: Arbejdsgiver B', 38910, true),
+        line('Eksempel: Uddannelses- og Forskningsstyrelsen (UFS)', 63000, false)
+      ],
+      holiday: [line('Eksempel: Arbejdsgiver A', 3200, true)],
+      through: 9,
+      expected: 30000,
+      capital: 0,
+      suMonths: new Array(12).fill(true)
+    };
+  }
+
+  function blankState() {
+    return {
+      example: false,
+      income: [line()],
+      holiday: [line()],
+      through: defaultThrough(),
+      expected: 0,
+      capital: 0,
+      suMonths: new Array(12).fill(true)
+    };
+  }
+
+  function sanitize(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const lines = function (arr) {
+      return Array.isArray(arr) ? arr.map(function (l) {
+        return { id: uid(), name: String(l && l.name || ''), amount: Number(l && l.amount) || 0, counts: !(l && l.counts === false) };
+      }) : [];
+    };
+    const months = Array.isArray(raw.suMonths) && raw.suMonths.length === 12
+      ? raw.suMonths.map(function (m) { return m !== false; })
+      : new Array(12).fill(true);
+    const through = Math.min(12, Math.max(0, parseInt(raw.through, 10)));
+    return {
+      example: false,
+      income: lines(raw.income),
+      holiday: lines(raw.holiday),
+      through: isFinite(through) ? through : defaultThrough(),
+      expected: Number(raw.expected) || 0,
+      capital: Number(raw.capital) || 0,
+      suMonths: months
+    };
+  }
+
+  let storageOk = true;
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? sanitize(JSON.parse(raw)) : null;
+    } catch (e) {
+      storageOk = false;
+      return null;
+    }
+  }
+  function save() {
+    if (state.example) { setSaveStatus(); return; }
+    try {
+      const data = {
+        v: 1, year: RATES.year,
+        income: state.income.map(function (l) { return { name: l.name, amount: l.amount, counts: l.counts }; }),
+        holiday: state.holiday.map(function (l) { return { name: l.name, amount: l.amount, counts: l.counts }; }),
+        through: state.through, expected: state.expected, capital: state.capital, suMonths: state.suMonths
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      storageOk = true;
+    } catch (e) {
+      storageOk = false;
+    }
+    setSaveStatus();
+  }
+  function clearStorage() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignorer */ }
+  }
+  function setSaveStatus() {
+    const el = $('saveStatus');
+    if (state.example) el.textContent = 'Eksempeltal gemmes ikke.';
+    else if (!storageOk) el.textContent = 'Din browser tillader ikke lokal lagring, så tallene forsvinder, når du lukker siden.';
+    else el.textContent = '✓ Gemt i denne browser.';
+  }
+
+  let state = load() || exampleState();
+
+  /* ---------- Indkomstlinjer ---------- */
+
+  function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+
+  function buildRow(kind, l) {
+    const tr = el('tr');
+    tr.dataset.id = l.id;
+
+    const tdName = el('td', 'c-name');
+    const name = el('input');
+    name.type = 'text';
+    name.value = l.name;
+    name.placeholder = kind === 'income' ? 'Afsender, fx arbejdsgiver' : 'Arbejdsgiver';
+    name.autocomplete = 'off';
+    name.dataset.field = 'name';
+    name.setAttribute('aria-label', kind === 'income' ? 'Afsender' : 'Arbejdsgiver');
+    const badge = el('span', 'badge');
+    badge.textContent = 'SU – tæller ikke med';
+    tdName.append(name, badge);
+
+    const tdAmt = el('td', 'c-amt');
+    const wrap = el('span', 'money');
+    const amt = el('input');
+    amt.type = 'text';
+    amt.inputMode = 'decimal';
+    amt.value = showAmount(l.amount);
+    amt.placeholder = '0';
+    amt.autocomplete = 'off';
+    amt.dataset.field = 'amount';
+    amt.setAttribute('aria-label', 'Beløb i kr.');
+    const unit = el('span', 'unit');
+    unit.textContent = 'kr.';
+    wrap.append(amt, unit);
+    tdAmt.append(wrap);
+
+    const tdChk = el('td', 'c-chk');
+    const lab = el('label', 'chk');
+    const cb = el('input');
+    cb.type = 'checkbox';
+    cb.dataset.field = 'counts';
+    const labText = el('span', 'chk-label');
+    labText.textContent = kind === 'income' ? 'Tæller med' : 'Tæller med i år';
+    cb.setAttribute('aria-label', labText.textContent);
+    lab.append(cb, labText);
+    tdChk.append(lab);
+
+    const tdDel = el('td', 'c-del');
+    const del = el('button', 'del');
+    del.type = 'button';
+    del.dataset.field = 'remove';
+    del.setAttribute('aria-label', 'Fjern linje');
+    del.textContent = '×';
+    tdDel.append(del);
+
+    tr.append(tdName, tdAmt, tdChk, tdDel);
+    syncRow(kind, tr, l);
+    return tr;
+  }
+
+  function syncRow(kind, tr, l) {
+    const su = kind === 'income' && isSuSender(l.name, RATES);
+    const cb = tr.querySelector('input[type="checkbox"]');
+    tr.classList.toggle('is-su', su);
+    cb.disabled = su;
+    cb.checked = su ? false : l.counts;
+    cb.title = su ? 'Udbetalt SU tæller ikke med i egenindkomsten' : '';
+    tr.classList.toggle('off', !su && !l.counts);
+  }
+
+  function renderLines(kind) {
+    const body = $(kind + 'Body');
+    body.textContent = '';
+    if (!state[kind].length) {
+      const tr = el('tr', 'empty');
+      const td = el('td');
+      td.colSpan = 4;
+      td.textContent = kind === 'income' ? 'Ingen indkomstlinjer endnu.' : 'Ingen feriepenge indtastet.';
+      tr.append(td);
+      body.append(tr);
+      return;
+    }
+    state[kind].forEach(function (l) { body.append(buildRow(kind, l)); });
+  }
+
+  function findLine(kind, tr) {
+    const id = tr && tr.dataset.id;
+    return state[kind].find(function (l) { return l.id === id; });
+  }
+
+  ['income', 'holiday'].forEach(function (kind) {
+    const body = $(kind + 'Body');
+
+    body.addEventListener('input', function (e) {
+      const tr = e.target.closest('tr');
+      const l = findLine(kind, tr);
+      if (!l) return;
+      if (e.target.dataset.field === 'name') { l.name = e.target.value; syncRow(kind, tr, l); }
+      else if (e.target.dataset.field === 'amount') { l.amount = parseAmount(e.target.value); }
+      else return;
+      changed();
+    });
+
+    body.addEventListener('change', function (e) {
+      if (e.target.dataset.field !== 'counts') return;
+      const tr = e.target.closest('tr');
+      const l = findLine(kind, tr);
+      if (!l) return;
+      l.counts = e.target.checked;
+      syncRow(kind, tr, l);
+      changed();
+    });
+
+    body.addEventListener('focusout', function (e) {
+      if (e.target.dataset.field !== 'amount') return;
+      const l = findLine(kind, e.target.closest('tr'));
+      if (l) e.target.value = showAmount(l.amount);
+    });
+
+    body.addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-field="remove"]');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      state[kind] = state[kind].filter(function (l) { return l.id !== tr.dataset.id; });
+      renderLines(kind);
+      changed();
+    });
+  });
+
+  document.querySelectorAll('[data-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const kind = btn.dataset.add;
+      state[kind].push(line());
+      renderLines(kind);
+      changed();
+      const inputs = $(kind + 'Body').querySelectorAll('input[data-field="name"]');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+  });
+
+  /* ---------- Felter ---------- */
+
+  function renderFields() {
+    const sel = $('through');
+    if (!sel.options.length) {
+      const o0 = el('option'); o0.value = '0'; o0.textContent = 'Ingen måneder endnu'; sel.append(o0);
+      MONTHS_LONG.forEach(function (m, i) {
+        const o = el('option'); o.value = String(i + 1); o.textContent = m.charAt(0).toUpperCase() + m.slice(1); sel.append(o);
+      });
+    }
+    sel.value = String(state.through);
+    $('expected').value = showAmount(state.expected);
+    $('capital').value = showAmount(state.capital);
+  }
+
+  $('through').addEventListener('change', function (e) { state.through = parseInt(e.target.value, 10) || 0; changed(); });
+  ['expected', 'capital'].forEach(function (id) {
+    const input = $(id);
+    input.addEventListener('input', function () { state[id] = parseAmount(input.value); changed(); });
+    input.addEventListener('blur', function () { input.value = showAmount(state[id]); });
+  });
+
+  /* ---------- SU-måneder ---------- */
+
+  function renderMonths() {
+    const box = $('months');
+    box.textContent = '';
+    MONTHS.forEach(function (m, i) {
+      const on = state.suMonths[i];
+      const b = el('button', 'month');
+      b.type = 'button';
+      b.dataset.i = String(i);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.setAttribute('aria-label', MONTHS_LONG[i] + ': ' + (on ? 'med SU' : 'uden SU'));
+      const s1 = el('span', 'm'); s1.textContent = m;
+      const s2 = el('span', 's'); s2.textContent = on ? 'SU' : 'Uden SU';
+      b.append(s1, s2);
+      box.append(b);
+    });
+  }
+
+  $('months').addEventListener('click', function (e) {
+    const b = e.target.closest('.month');
+    if (!b) return;
+    const i = parseInt(b.dataset.i, 10);
+    state.suMonths[i] = !state.suMonths[i];
+    renderMonths();
+    $('months').querySelector('[data-i="' + i + '"]').focus();
+    changed();
+  });
+
+  /* ---------- Opdatering af resultat ---------- */
+
+  function monthRange(from, to) {
+    // from/to er 0-baserede månedsindeks
+    return from === to ? MONTHS_ABBR[from] : MONTHS_ABBR[from] + '–' + MONTHS_ABBR[to];
+  }
+
+  function update() {
+    const r = calculate(state, RATES);
+    const hero = $('hero');
+    hero.dataset.status = r.status;
+    document.body.classList.toggle('is-example', !!state.example);
+    $('exampleBanner').hidden = !state.example;
+
+    const leftRounded = Math.round(r.left);
+    const range = r.monthsLeft > 0 ? monthRange(12 - r.monthsLeft, 11) : '';
+
+    if (leftRounded >= 0) {
+      $('headline').innerHTML = 'Du har <strong>' + kr(r.left) + '</strong> tilbage før SU-loftet.';
+      if (r.monthsLeft > 0 && leftRounded > 0) {
+        $('subline').innerHTML = 'Det svarer til ca. <strong>' + kr(r.grossPerMonth) + '</strong> i bruttoløn pr. måned ' +
+          (r.monthsLeft === 1 ? 'i den resterende måned (' + range + ').' : 'i de resterende ' + r.monthsLeft + ' måneder (' + range + ').');
+      } else if (r.monthsLeft === 0) {
+        $('subline').textContent = 'Hele året er registreret, så der er ikke flere måneder at tjene penge i.';
+      } else {
+        $('subline').textContent = 'Du har ramt loftet præcist.';
+      }
+    } else {
+      $('headline').innerHTML = 'Du er <strong>' + kr(-r.left) + '</strong> over SU-loftet.';
+      $('subline').textContent = 'Overskrider du fribeløbet, skal du betale for meget modtaget SU tilbage. Læs om dine muligheder på su.dk.';
+    }
+
+    const pct = fmtPct.format(Math.round(r.ratio * 100));
+    $('statusText').textContent =
+      r.status === 'green' ? 'Grøn: prognosen er ' + pct + ' % af fribeløbet' :
+      r.status === 'orange' ? 'Orange: tæt på loftet, prognosen er ' + pct + ' % af fribeløbet' :
+      'Rød: prognosen er ' + pct + ' % af fribeløbet';
+
+    // Måler
+    const max = Math.max(r.allowance, r.forecast, r.ownNow) * 1.1;
+    const p = function (v) { return Math.min(100, Math.max(0, v / max * 100)); };
+    const pNow = p(r.ownNow), pFc = p(r.forecast), pLim = p(r.allowance);
+    $('gNow').style.width = pNow + '%';
+    $('gFc').style.left = pNow + '%';
+    $('gFc').style.width = Math.max(0, pFc - pNow) + '%';
+    const lim = $('gLimit');
+    lim.style.left = pLim + '%';
+    lim.className = 'limit ' + (pLim > 50 ? 'anchor-right' : 'anchor-left');
+    $('gLimitLabel').textContent = 'Fribeløb ' + kr(r.allowance);
+    $('gauge').setAttribute('aria-label',
+      'Egenindkomst nu ' + kr(r.ownNow) + ', prognose ' + kr(r.forecast) + ', fribeløb ' + kr(r.allowance) + '.');
+    $('lNow').textContent = kr(r.ownNow);
+    $('lFc').textContent = kr(r.forecast);
+    $('lLim').textContent = kr(r.allowance);
+
+    const diff = r.allowance - r.forecast;
+    let fl = 'Prognose for ' + RATES.year + ': ' + kr(r.forecast) + ', ' +
+      (Math.round(diff) >= 0 ? kr(diff) + ' under fribeløbet.' : kr(-diff) + ' over fribeløbet.');
+    if (r.monthsLeft > 0 && !(state.expected > 0)) fl += ' Udfyld „Forventet bruttoløn resten af året“ for en mere præcis prognose.';
+    $('forecastLine').textContent = fl;
+
+    // Summer
+    $('incomeSum').textContent = kr(r.incomeCounted);
+    $('holidaySum').textContent = kr(r.holidayCounted);
+
+    // Forventet løn – hjælpetekst
+    $('expectedHint').textContent = r.monthsLeft > 0
+      ? 'Samlet for ' + (r.monthsLeft === 1 ? 'den sidste måned' : 'de sidste ' + r.monthsLeft + ' måneder') + ' (' + range + '). Fx månedsløn × ' + r.monthsLeft + '.'
+      : 'Ingen måneder tilbage af året.';
+
+    // Måneder uden SU
+    const off = [];
+    state.suMonths.forEach(function (on, i) { if (!on) off.push(i); });
+    const note = $('monthsNote');
+    if (off.length) {
+      const extra = off.length * (RATES.monthlyWithoutSU - RATES.monthlyWithSU);
+      note.textContent = 'Uden SU: ' + off.map(function (i) { return MONTHS[i]; }).join(', ') + ' – hæver fribeløbet med ' + kr(extra);
+      note.className = 'months-note warn';
+    } else {
+      note.textContent = 'SU i alle 12 måneder.';
+      note.className = 'months-note';
+    }
+    $('allowance').textContent = kr(r.allowance);
+
+    // Beregning
+    $('cWage').textContent = kr(r.wage);
+    $('cAmLabel').textContent = '− AM-bidrag ' + fmtPct.format(RATES.amRate * 100) + ' %';
+    $('cAm').textContent = kr(r.am);
+    $('cCap').textContent = kr(r.capital);
+    $('cOwn').textContent = kr(r.ownNow);
+    $('cExpLabel').textContent = '+ Forventet løn efter AM-bidrag (× ' + fmt2.format(1 - RATES.amRate) + ')';
+    $('cExp').textContent = kr(r.expectedNet);
+    $('cFc').textContent = kr(r.forecast);
+    $('cAllow').textContent = kr(r.allowance);
+
+    setSaveStatus();
+  }
+
+  function changed() {
+    if (state.example) {
+      // Første ændring: brugeren tager over, og tallene begynder at blive gemt.
+      state.example = false;
+    }
+    save();
+    update();
+  }
+
+  function renderAll() {
+    renderLines('income');
+    renderLines('holiday');
+    renderFields();
+    renderMonths();
+    update();
+  }
+
+  $('clearExample').addEventListener('click', function () {
+    state = blankState();
+    save();
+    renderAll();
+    const first = $('incomeBody').querySelector('input[data-field="name"]');
+    if (first) first.focus();
+  });
+
+  $('deleteData').addEventListener('click', function () {
+    if (!window.confirm('Slet dine tal fra denne browser? Det kan ikke fortrydes.')) return;
+    clearStorage();
+    state = exampleState();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Årstal og link fra RATES
+  document.querySelectorAll('[data-year]').forEach(function (e) { e.textContent = String(RATES.year); });
+  document.title = 'SU-loft ' + RATES.year;
+  $('satserLink').href = RATES.satserUrl;
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
